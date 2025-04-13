@@ -3,11 +3,13 @@ import './Login.css';
 import { useState } from 'react';
 import { Calendar } from 'lucide-react';
 import { googleLogout, useGoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
 import { Link, useNavigate } from 'react-router-dom';
+import { verifyUser } from '../services/api';
 
 
 export default function LoginPage() {
+
+  const backendURL = process.env.REACT_APP_BACKEND_URL;
 
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState({
@@ -17,13 +19,11 @@ export default function LoginPage() {
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      window.localStorage.setItem("token", tokenResponse);
 
-    //   console.log(tokenResponse);
-    //   console.log(tokenResponse.access_token);
-    //   const decoded = jwtDecode(tokenResponse.access_token);
-    //   console.log('Google user info:', decoded);
-    
-      // Store token or user data here if needed
+      const res = await verifyUser( tokenResponse);
+      window.localStorage.setItem("key", res);
+
       setIsLoading(prev => ({ ...prev, google: false }));
 
       navigate('/dashboard');
@@ -43,7 +43,7 @@ export default function LoginPage() {
             <div className="app-icon">
               <Calendar size={48} />
             </div>
-            <h1 className="app-title">TimeSync</h1>
+            <h1 className="app-title">ScheduLy.com</h1>
             <p className="app-subtitle">Sign in to access your calendar</p>
           </div>
 
