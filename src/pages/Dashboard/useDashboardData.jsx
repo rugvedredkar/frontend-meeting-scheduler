@@ -18,11 +18,12 @@ export default function useDashboardData() {
         //   getMyEvents()
         // ]);
 
+        const userRes = await getUser();
         const friendsRes = await getFriends();
         const meetingsRes = await getMyEvents();
 
         // console.log(friendsRes);
-        // setUser(userRes);
+        setUser(userRes);
         setFriends(friendsRes);
         setMeetings(meetingsRes);
         // console.log(friends);
