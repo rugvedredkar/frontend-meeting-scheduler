@@ -14,7 +14,6 @@ import Meetings from '../components/meetings';
 import './styles/Dashboard.css';
 
 export default function Dashboard() {
-
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('calendar');
@@ -26,7 +25,6 @@ export default function Dashboard() {
   const [viewingOwnCalendar, setViewingOwnCalendar] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [showAddFriend, setShowAddFriend] = useState(false);
-  
 
   const [user, setUser] = useState({});
   const [friends, setFriends] = useState({});
@@ -47,7 +45,6 @@ export default function Dashboard() {
         setFriends(friendsRes);
         setAvailableFriends(suggestedRes);
         setMeetings(meetingsRes);
-
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
       } finally {
@@ -144,25 +141,26 @@ export default function Dashboard() {
                     <MinusSquare size={18} onClick={() => setShowFriendsList(false)} title="Minimize" />
                   </div>
                 </div>
-                {loading 
-                 ? "Loading..." : friends.map(friend => (
-                  <div
-                    key={friends.id}
-                    className={`friend-item ${selectedFriend && selectedFriend.id === friend.id ? 'selected' : ''}`}
-                    onClick={() => setSelectedFriend(friend)}
-                  >
-                    <div className="friend-avatar">
-                      <User size={18} />
-                    </div>
-                    <span className="friend-name">{friend.name}</span>
-                  </div>
-                ))}
+                {loading
+                  ? 'Loading...'
+                  : friends.map(friend => (
+                      <div
+                        key={friends.id}
+                        className={`friend-item ${selectedFriend && selectedFriend.id === friend.id ? 'selected' : ''}`}
+                        onClick={() => setSelectedFriend(friend)}
+                      >
+                        <div className="friend-avatar">
+                          <User size={18} />
+                        </div>
+                        <span className="friend-name">{friend.name}</span>
+                      </div>
+                    ))}
               </div>
             )}
 
             {/* Calendar or Meetings Area */}
             <div className="calendar-area">
-              {activeTab === 'calendar' && <Calendar/>}
+              {activeTab === 'calendar' && <Calendar />}
 
               {activeTab === 'schedule' && selectedFriend && <Calendar isOwnCalendar={false} />}
 
@@ -170,7 +168,7 @@ export default function Dashboard() {
                 <div className="empty-state">Select a friend to schedule with</div>
               )}
 
-              {activeTab === 'meetings' && <Meetings/>}
+              {activeTab === 'meetings' && <Meetings />}
 
               {activeTab === 'addFriend' && (
                 <div className="add-friend-container">

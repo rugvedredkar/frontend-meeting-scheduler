@@ -237,7 +237,7 @@ body {
   color: #6b7280;
   font-size: 16px;
   margin: auto;
-};
+}
 
 /* Meetings Styles */
 .meetings-container {
@@ -515,4 +515,4 @@ body {
 
 .add-button:hover {
   background-color: #2563eb;
-};
+}

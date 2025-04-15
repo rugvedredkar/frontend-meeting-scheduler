@@ -27,7 +27,7 @@ export default function LoginPage() {
       await verifyUser(idToken);
 
       // #### TO DO #### Add an onboarding form if the user is virgin
-      
+
       navigate('/dashboard');
     } catch (err) {
       console.error('Login failed:', err);

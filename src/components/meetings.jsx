@@ -1,8 +1,7 @@
 import { Calendar as CalendarIcon, User, Clock } from 'lucide-react';
 
 export default function Meetings({ meetings }) {
-
-  console.log(meetings)
+  console.log(meetings);
   return (
     <>
       <div className="meetings-container">
