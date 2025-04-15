@@ -1,7 +1,36 @@
-import { CalendarIcon, Clock, UserPlus, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { CalendarIcon, Clock, UserPlus, Plus, LogOut } from 'lucide-react';
+import { useState, useNavigate } from 'react';
 
-import UserDropDown from '../../components/user';
+// import UserDropDown from '../../components/user';
+
+function UserDropDown(user) {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+  // Handle logout
+  const handleLogout = () => {
+    // In a real app, you would clear tokens, cookies, etc.
+    setIsLoggedIn(false);
+    // Navigate to login page
+    navigate('/');
+  };
+
+  return (
+    <>
+      <div className="user-menu">
+        <div className="user-menu-info">
+          <div className="user-menu-name">{user.name}</div>
+          <div className="user-menu-email">{user.email}</div>
+        </div>
+        <div className="user-menu-divider"></div>
+        <div className="user-menu-item logout" onClick={handleLogout}>
+          <LogOut size={16} />
+          <span>Logout</span>
+        </div>
+      </div>
+    </>
+  );
+}
 
 export default function SideBar({ activeTab, onTabChange, user }) {
   const [showUserMenu, setShowUserMenu] = useState(false);

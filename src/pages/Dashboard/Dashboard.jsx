@@ -4,10 +4,13 @@ import useDashboardData from './useDashboardData';
 import SideBar from './Sidebar';
 import ScheduleMeet from './Tabs/ScheduleMeet';
 import Meetings from './Tabs/Meetings';
-import Calendar from '../../components/calendar';
 import Friends from './Tabs/Friends';
+import Calendar from '../../components/calendar';
 
-export default function DashboardR() {
+import '../styles/Dashboard.css'
+import '../styles/Calendar.css';
+
+export default function Dashboard() {
   const [activetab, setActiveTab] = useState('calendar');
 
   const { user, friends, meetings, loading } = useDashboardData();
