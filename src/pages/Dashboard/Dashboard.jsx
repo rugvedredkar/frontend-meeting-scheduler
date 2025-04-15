@@ -15,6 +15,7 @@ export default function DashboardR () {
         user, friends, meetings, loading
       } = useDashboardData();
     
+    console.log(friends)
     const handleTabChange = (tab) => {
         setActiveTab(tab)
     }

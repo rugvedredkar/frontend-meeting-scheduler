@@ -14,7 +14,6 @@ export async function verifyUser(idToken) {
 }
 
 export async function getMyEvents() {
-
   const idToken = localStorage.getItem("token"); // previously stored Google ID token
 
   if (!idToken) {
@@ -33,15 +32,13 @@ export async function getMyEvents() {
   }
 
   const {events : resObj } = await res.json();
-
+  
   console.log(resObj);
   
   return resObj;
 }
 
 export async function getFriendsAvailability(friends_id){
-
-
   const idToken = localStorage.getItem("token"); // previously stored Google ID token
 
   if (!idToken) {
@@ -72,9 +69,86 @@ export async function getFriendsAvailability(friends_id){
   ]
 }
 
+// New function to check available time slots for a specific date
+export async function checkAvailability(date, friendId = null) {
+  const idToken = localStorage.getItem("token");
+  
+  if (!idToken) {
+    throw new Error("No auth token found. Please log in again.");
+  }
+  
+  try {
+    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    
+    const url = friendId 
+      ? `${API_BASE}/check-availability?date=${formattedDate}&friend_id=${friendId}`
+      : `${API_BASE}/check-availability?date=${formattedDate}`;
+      
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${idToken}`
+      }
+    });
+    
+    if (!res.ok) {
+      throw new Error("Failed to fetch availability");
+    }
+    
+    // For now, simulate response with available time slots
+    // This would normally come from the API response
+    const timeSlots = [];
+    
+    // Generate time slots from 9 AM to 6 PM
+    for (let hour = 9; hour <= 17; hour++) {
+      const formattedHour = hour.toString().padStart(2, '0');
+      // Generate random availability (for demo purposes)
+      const isAvailable = Math.random() > 0.3;
+      
+      timeSlots.push({
+        time: `${formattedHour}:00`,
+        available: isAvailable
+      });
+    }
+    
+    return timeSlots;
+  } catch (error) {
+    console.error("Error checking availability:", error);
+    throw error;
+  }
+}
+
+// New function to book a meeting
+export async function bookMeeting(meetingDetails) {
+  const idToken = localStorage.getItem("token");
+  
+  if (!idToken) {
+    throw new Error("No auth token found. Please log in again.");
+  }
+  
+  try {
+    const res = await fetch(`${API_BASE}/book-meeting`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${idToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(meetingDetails)
+    });
+    
+    if (!res.ok) {
+      throw new Error("Failed to book meeting");
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error("Error booking meeting:", error);
+    throw error;
+  }
+}
+
 export async function getUser() {
   // Sample user data
-
   const user = {
     name: 'Jamie Smith',
     email: 'jamie.smith@example.com',
@@ -107,13 +181,10 @@ export async function getSuggestedFriends(quantity=5) {
   return availableFriends;
 }
 
-
 export async function acceptFriendRequest(friendID){
-
+  // Implementation
 }
 
-export async function sendMeetingRequest (meetingObj){
-
+export async function sendMeetingRequest(meetingObj){
+  // Implementation
 }
-
-
