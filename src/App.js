@@ -1,5 +1,5 @@
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import AppRoutes from "./routes/AppRoutes";
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import AppRoutes from './routes/AppRoutes';
 
 export default function App() {
   return (
