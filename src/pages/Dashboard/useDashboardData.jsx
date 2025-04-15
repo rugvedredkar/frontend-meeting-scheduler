@@ -10,26 +10,33 @@ export default function useDashboardData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                // const [userRes, friendsRes, meetingsRes] = await Promise.all([
+                //   getUser(),
+                //   getFriends(),
+                //   getMyEvents()
+                // ]);
+
+                const friendsRes = await getFriends();
+                const meetingsRes = await getMyEvents();
+                
+                // console.log(friendsRes);
+                // setUser(userRes);
+                setFriends(friendsRes); 
+                setMeetings(meetingsRes);
+                // console.log(friends);
+              } catch (err) {
+                console.error('Dashboard fetch failed:', err);
+              } finally {
+                setLoading(false);
+              }
+        }
+
         fetchData();
     }, [])
-
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            const [userRes, friendsRes, meetingsRes] = await Promise.all([
-              getUser(),
-              getFriends(),
-              getMyEvents()
-            ]);
-            setUser(userRes);
-            setFriends(friendsRes);
-            setMeetings(meetingsRes);
-          } catch (err) {
-            console.error('Dashboard fetch failed:', err);
-          } finally {
-            setLoading(false);
-          }
-    }
+    
 
     // // These are mutation helpers
     // const addFriend = async (friendId) => {
@@ -42,6 +49,7 @@ export default function useDashboardData() {
     //     setMeetings(prev => [...prev, newMeeting]); // local update
     // };
 
+    console.log(friends);
     return {
         user, friends, meetings, loading
         // addFriend, addMeeting, fetchData // expose manual refresh

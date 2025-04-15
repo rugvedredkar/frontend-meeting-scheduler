@@ -19,6 +19,7 @@ export default function DashboardR () {
         setActiveTab(tab)
     }
     
+    console.log(friends);
     return (
         <>
             <div className="dashboard-container">
@@ -29,7 +30,7 @@ export default function DashboardR () {
                         {activetab === 'schedule' && <ScheduleMeet friends={friends}/>}
                         {activetab === 'calendar' && <Calendar isOwnCalendar={true}/>}
                         {activetab === 'meetings' && <Meetings meetings={meetings}/>}
-                        {activetab === 'friends' && <Friends myFriends={friends}/>}
+                        {activetab === 'friends' && <Friends myFriends={friends} loading = {loading}/>}
                     </div>
                 </div>
             </div>

@@ -6,7 +6,6 @@ export default function ScheduleMeet ({friends, loading}) {
 
     const [selectedFriend, setSelectedFriend] = useState(null);
 
-
     return (
         <> 
             {/* Friends List */}
@@ -22,7 +21,7 @@ export default function ScheduleMeet ({friends, loading}) {
                 {loading 
                  ? "Loading..." : friends.map(friend => (
                   <div
-                    key={friends.id}
+                    key={friend.id}
                     className={`friend-item ${selectedFriend && selectedFriend.id === friend.id ? 'selected' : ''}`}
                     onClick={() => setSelectedFriend(friend)}
                   >

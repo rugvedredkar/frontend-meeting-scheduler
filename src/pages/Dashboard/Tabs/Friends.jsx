@@ -4,7 +4,7 @@ import { getSuggestedFriends } from "../../../services/api";
 
 function AddFriendTile({ friend }) {
     return (
-      <>
+        <>
         <div key={friend.id} className="user-result">
           <div className="user-avatar">
             <User size={20} />
