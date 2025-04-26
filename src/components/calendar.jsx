@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, X, User, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, X, User, MapPin, Mail } from 'lucide-react';
 import { getColleaguesAvailability, getMyEvents, bookMeeting, checkAvailability } from '../services/api';
 import '../pages/styles/Calendar.css';
 
@@ -16,6 +16,7 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
   const [meetingDetails, setMeetingDetails] = useState({
     title: '',
     attendees: 1,
+    email: '',
     location: '',
     meetingType: 'online'
   });
@@ -199,6 +200,7 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
       setMeetingDetails({
         title: '',
         attendees: 1,
+        email: '',
         location: '',
         meetingType: 'online'
       });
@@ -272,7 +274,7 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
         </div>
       )}
 
-      {/* Time Slot Selection Modal - Only shown when not viewing own calendar and in Schedule Meet tab */}
+      {/* Time Slot Selection Modal - Vertical Scroll Layout - Only shown when not viewing own calendar and in Schedule Meet tab */}
       {!isCalendarTab && !isOwnCalendar && showTimeSlots && selectedDate && (
         <div className="time-slot-modal">
           <div className="time-slot-content">
@@ -282,14 +284,18 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
                 <X size={18} />
               </div>
             </div>
-            <div className="time-slots-container">
+            <div className="time-slots-scroll-container">
               {generateTimeSlots().map((slot, index) => (
                 <div
                   key={index}
-                  className={`time-slot ${!slot.available ? 'unavailable' : ''} ${selectedTimeSlot === slot.time ? 'selected' : ''}`}
+                  className={`time-slot-vertical ${!slot.available ? 'unavailable' : ''} ${selectedTimeSlot === slot.time ? 'selected' : ''}`}
                   onClick={() => handleTimeSlotSelect(slot)}
                 >
-                  {slot.time}
+                  <Clock size={16} className="time-slot-icon" />
+                  <span>{slot.time}</span>
+                  <span className="availability-indicator">
+                    {slot.available ? 'Available' : 'Unavailable'}
+                  </span>
                 </div>
               ))}
             </div>
@@ -340,7 +346,21 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
                   required
                 />
               </div>
-
+              
+              <div className="form-row">
+                <label className="form-label" htmlFor="email">Email Address</label>
+                <input
+                  className="form-input"
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={meetingDetails.email}
+                  onChange={handleMeetingFormChange}
+                  placeholder="Enter email address"
+                  required
+                />
+              </div>
+              
               <div className="form-row">
                 <label className="form-label">Meeting Type</label>
                 <div className="radio-group">

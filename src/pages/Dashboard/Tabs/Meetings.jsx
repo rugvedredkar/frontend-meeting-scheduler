@@ -1,4 +1,5 @@
 import { Calendar as CalendarIcon, User, Clock } from 'lucide-react';
+import { useState } from 'react';
 
 function MeetingTile({ meeting }) {
   return (
@@ -22,21 +23,44 @@ function MeetingTile({ meeting }) {
   );
 }
 
-export default function Meetings({ meetings }) {
-  // add ongoing meeting, past meeting and also view meeting details section
+export default function Meetings({ meetings = [], meetingRequests = [], meetingsSent = [] }) {
+  const [activeTab, setActiveTab] = useState(0);
+  
+  const tabs = [
+    { title: "My Scheduled Meetings", data: meetings },
+    { title: "Meeting Requests", data: meetingRequests },
+    { title: "Meetings Sent", data: meetingsSent }
+  ];
+
   return (
     <div className="calendar-area">
       <div className="meetings-container">
-        <h2 className="meetings-title">My Scheduled Meetings</h2>
-        {meetings.length > 0 ? (
-          <div className="meetings-list">
-            {meetings.map(meeting => (
-              <MeetingTile meeting={meeting} />
-            ))}
+        <div className="meetings-tabs">
+          {tabs.map((tab, index) => (
+            <div 
+              key={index}
+              className={`meetings-tab ${activeTab === index ? 'active' : ''}`}
+              onClick={() => setActiveTab(index)}
+            >
+              {tab.title}
+            </div>
+          ))}
+        </div>
+        
+        {tabs.map((tab, index) => (
+          <div key={index} className={`meetings-section ${activeTab === index ? 'active' : ''}`}>
+            <h2 className="meetings-title">{tab.title}</h2>
+            {tab.data.length > 0 ? (
+              <div className="meetings-list">
+                {tab.data.map(meeting => (
+                  <MeetingTile key={meeting.id} meeting={meeting} />
+                ))}
+              </div>
+            ) : (
+              <div className="empty-meetings">No {tab.title.toLowerCase()}</div>
+            )}
           </div>
-        ) : (
-          <div className="empty-meetings">No scheduled meetings</div>
-        )}
+        ))}
       </div>
     </div>
   );
