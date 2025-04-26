@@ -81,6 +81,11 @@
   border-left: 3px solid #3b82f6;
 }
 
+.calendar-day.selected {
+  border: 2px solid #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
 .day-number {
   font-size: 14px;
   margin-bottom: 4px;
@@ -98,7 +103,7 @@
   text-overflow: ellipsis;
 }
 
-/* Time Slot Selection Modal */
+/* Time Slot Selection Modal with Vertical Scroll */
 .time-slot-modal {
   position: fixed;
   top: 0;
@@ -114,7 +119,7 @@
 
 .time-slot-content {
   width: 90%;
-  max-width: 500px;
+  max-width: 400px;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -152,38 +157,55 @@
   background-color: #f3f4f6;
 }
 
-.time-slots-container {
+/* New vertical scroll time slots container */
+.time-slots-scroll-container {
   padding: 16px;
   max-height: 400px;
   overflow-y: auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.time-slot {
-  padding: 12px;
+.time-slot-vertical {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
   background-color: #f3f4f6;
   border-radius: 6px;
   cursor: pointer;
-  text-align: center;
   transition: all 0.2s;
   font-size: 14px;
+  gap: 12px;
+  position: relative;
 }
 
-.time-slot:hover {
+.time-slot-vertical:hover {
   background-color: #e5e7eb;
 }
 
-.time-slot.unavailable {
+.time-slot-vertical.unavailable {
   opacity: 0.5;
   cursor: not-allowed;
-  text-decoration: line-through;
 }
 
-.time-slot.selected {
+.time-slot-vertical.selected {
   background-color: #3b82f6;
   color: white;
+}
+
+.time-slot-icon {
+  color: inherit;
+}
+
+.availability-indicator {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.time-slot-vertical.unavailable .availability-indicator {
+  text-decoration: line-through;
 }
 
 /* Meeting Form Modal */
@@ -304,4 +326,4 @@
 
 .btn-confirm:hover {
   background-color: #2563eb;
-}
+};

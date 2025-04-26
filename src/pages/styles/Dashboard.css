@@ -302,6 +302,39 @@ body {
   font-size: 16px;
   margin: 32px auto;
 }
+/* Additional Meeting Styles */
+.meetings-tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.meetings-tab {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.meetings-tab:hover {
+  color: #3b82f6;
+}
+
+.meetings-tab.active {
+  color: #3b82f6;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.meetings-section {
+  display: none;
+}
+
+.meetings-section.active {
+  display: block;
+}
 
 /* Login/Logout Screen */
 .login-container {
