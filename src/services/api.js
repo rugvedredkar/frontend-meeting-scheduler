@@ -1,5 +1,33 @@
-const API_BASE = 'http://10.9.185.241:8080'; // Change this if you're deployed
+import { jwtDecode } from 'jwt-decode';
+const API_BASE = 'http://10.0.0.243:8080'; // Change this if you're deployed
 
+/*
+ * Gets the user info
+ */
+export async function getUser() {
+  const idToken = localStorage.getItem('token'); // Assuming you stored id_token after login
+
+  if (idToken) {
+    const userInfo = jwtDecode(idToken);
+    console.log(userInfo);
+    return userInfo;
+  }
+}
+
+/*
+ * POST request to """/login"""
+ * This request verifies is the user exists in google session too
+ * Example Response:
+ * {
+        "message": "Login successful",
+        "user": {
+            "name": "user's-name",
+            "email": "user-email",
+            "picture": "picture-url"
+        },
+        "virgin" : true // defines if user is new to the app
+    }
+ */
 export async function verifyUser(idToken) {
   const res = await fetch(`${API_BASE}/login`, {
     method: 'POST',
@@ -10,11 +38,25 @@ export async function verifyUser(idToken) {
   });
 
   if (!res.ok) throw new Error('Login failed');
-  return await res.json(); // this contains user info from the backend
+  return await res.json();
 }
 
+/*
+ * GET request to """/events"""
+ * This requests gets events for the logged in user
+ * Example Response:
+ * listof({
+            'id': event_id,
+            'title': title,
+            'user': user_name,
+            'description': desc,
+            'date':data,
+            'time':time,
+            'venue':venue
+        })
+ */
 export async function getMyEvents() {
-  const idToken = localStorage.getItem('token'); // previously stored Google ID token
+  const idToken = localStorage.getItem('token');
 
   if (!idToken) {
     throw new Error('No auth token found. Please log in again.');
@@ -33,31 +75,126 @@ export async function getMyEvents() {
 
   const { events: resObj } = await res.json();
 
-  // console.log(resObj);
-
   return resObj;
 }
 
-export async function getFriendsAvailability(friends_id) {
-  const idToken = localStorage.getItem('token'); // previously stored Google ID token
+/* 
+ * Get request to """/colleagues-availability"""
+ * This request gets events of user with user_id == colleagues_id
+ * Example Response: 
+ * listof({
+            'date': '2025-04-21',
+            'id': 'bb10c35c-c28f-4d5a-980d-38cb109b8bd6',
+            'time': '12:00'
+          })
+ * 
+ */
+export async function getColleaguesAvailability(colleagues_id) {
+  const idToken = localStorage.getItem('token');
 
   if (!idToken) {
     throw new Error('No auth token found. Please log in again.');
   }
 
-  const res = await fetch(`${API_BASE}/friends-availability`, {
+  const res = await fetch(`${API_BASE}/colleagues-availability?colleagues_id=${colleagues_id}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${idToken}`
-    },
-    payload: {
-      friends_id: friends_id
     }
   });
 
-  const freindsSchedule = await res.json();
+  const colleaguesAvailability = await res.json();
 
-  return freindsSchedule;
+  return colleaguesAvailability;
+}
+
+/*
+ * GET request to """/friends"""
+ * Gets connections of the logged in user
+ * Example Response:
+ * [
+      { id: 4, name: 'Robin Chen', email: 'robin.chen@example.com' },
+      { id: 5, name: 'Morgan Lee', email: 'morgan.lee@example.com' },
+      { id: 6, name: 'Casey Taylor', email: 'casey.taylor@example.com' }
+ * ]
+ * 
+ */
+export async function getFriends() {
+  const idToken = localStorage.getItem('token');
+
+  if (!idToken) {
+    throw new Error('No auth token found. Please log in again.');
+  }
+
+  const res = await fetch(`${API_BASE}/friends`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${idToken}`
+    }
+  });
+
+  const connections = await res.json();
+
+  return connections;
+}
+
+/*
+ * GET request to """/recents"""
+ * This request gets list of freinds that user recently booked events with
+ * Example Response: 
+ * [
+      { id: 4, name: 'Robin Chen', email: 'robin.chen@example.com' },
+      { id: 5, name: 'Morgan Lee', email: 'morgan.lee@example.com' },
+      { id: 6, name: 'Casey Taylor', email: 'casey.taylor@example.com' }
+ * ]
+ * 
+ */
+export async function getRecents() {
+  const idToken = localStorage.getItem('token');
+
+  if (!idToken) {
+    throw new Error('No auth token found. Please log in again.');
+  }
+
+  const res = await fetch(`${API_BASE}/recents`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${idToken}`
+    }
+  });
+
+  const recents = await res.json();
+
+  return recents;
+}
+
+/*
+ * GET request to """/suggested-friends"""
+ * This request gets quantity number of friends of friends
+ * Example Response:
+ * [
+      { id: 4, name: 'Robin Chen', email: 'robin.chen@example.com' },
+      { id: 5, name: 'Morgan Lee', email: 'morgan.lee@example.com' },
+      { id: 6, name: 'Casey Taylor', email: 'casey.taylor@example.com' }
+ * ]
+ */
+export async function getSuggestedFriends(quantity = 5) {
+  const idToken = localStorage.getItem('token');
+
+  if (!idToken) {
+    throw new Error('No auth token found. Please log in again.');
+  }
+
+  const res = await fetch(`${API_BASE}/suggested-friends?quantity=${quantity}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${idToken}`
+    }
+  });
+
+  const availableFriends = await res.json();
+
+  return availableFriends;
 }
 
 // New function to check available time slots for a specific date
@@ -138,40 +275,9 @@ export async function bookMeeting(meetingDetails) {
   }
 }
 
-export async function getUser() {
-  // Sample user data
-  const user = {
-    name: 'Jamie Smith',
-    email: 'jamie.smith@example.com',
-    avatar: 'JS'
-  };
-
-  return user;
-}
-
-export async function getFriends() {
-  const friends = [
-    { id: 1, name: 'Alex Smith' },
-    { id: 2, name: 'Taylor Kim' },
-    { id: 3, name: 'Jordan Park' }
-  ];
-
-  return friends;
-}
-
-// for available friends
-export async function getSuggestedFriends(quantity = 5) {
-  // gets suggested freinds based on freinds of freinds
-  // Sample available users to add as friends
-  const availableFriends = [
-    { id: 4, name: 'Robin Chen', email: 'robin.chen@example.com' },
-    { id: 5, name: 'Morgan Lee', email: 'morgan.lee@example.com' },
-    { id: 6, name: 'Casey Taylor', email: 'casey.taylor@example.com' }
-  ];
-
-  return availableFriends;
-}
-
+// #################################
+//          INCOMPLETE
+// #################################
 export async function acceptFriendRequest(friendID) {
   // Implementation
 }

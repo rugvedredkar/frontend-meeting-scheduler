@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, X, User, MapPin } from 'lucide-react';
-import { getFriendsAvailability, getMyEvents, bookMeeting, checkAvailability } from '../services/api';
+import { getColleaguesAvailability, getMyEvents, bookMeeting, checkAvailability } from '../services/api';
 import '../pages/styles/Calendar.css';
 
 export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, friendObj = null }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // New state for time slot selection and meeting form
   const [selectedDate, setSelectedDate] = useState(null);
   const [showTimeSlots, setShowTimeSlots] = useState(false);
@@ -30,9 +30,9 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
         if (isOwnCalendar) {
           data = await getMyEvents();
         } else if (friendObj) {
-          data = await getFriendsAvailability(friendObj.id);
+          data = await getColleaguesAvailability(friendObj.id);
         }
-        
+
         setEvents(data || []);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -63,10 +63,10 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
     // Add days of the month
     for (let i = 1; i <= lastDay.getDate(); i++) {
       const currentDate = new Date(year, month, i);
-      
+
       // Format the date to match the API format (YYYY-MM-DD)
       const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-      
+
       // Find events for this day
       const dayEvents = events.filter(event => event.date === formattedDate);
 
@@ -126,7 +126,7 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
   const generateTimeSlots = () => {
     const slots = [];
     for (let hour = 9; hour <= 17; hour++) {
-      const formattedHour = hour > 12 ? (hour - 12) : hour;
+      const formattedHour = hour > 12 ? hour - 12 : hour;
       const ampm = hour >= 12 ? 'PM' : 'AM';
       slots.push({
         time: `${formattedHour}:00 ${ampm}`,
@@ -137,10 +137,10 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
   };
 
   // Handler for when a day is clicked
-  const handleDayClick = (day) => {
+  const handleDayClick = day => {
     // Always highlight the selected day
     setSelectedDate(day.date);
-    
+
     // Only open time slots if not in calendar tab, there's a date, and not viewing own calendar
     if (!isCalendarTab && day.date && !isOwnCalendar) {
       // Don't open time slots for past dates
@@ -153,16 +153,16 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
   };
 
   // Handle time slot selection
-  const handleTimeSlotSelect = (timeSlot) => {
+  const handleTimeSlotSelect = timeSlot => {
     if (!timeSlot.available) return;
-    
+
     setSelectedTimeSlot(timeSlot.time);
     setShowTimeSlots(false);
     setShowMeetingForm(true);
   };
 
   // Handle meeting form changes
-  const handleMeetingFormChange = (e) => {
+  const handleMeetingFormChange = e => {
     const { name, value } = e.target;
     setMeetingDetails(prev => ({
       ...prev,
@@ -171,29 +171,27 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
   };
 
   // Handle meeting form submission
-  const handleMeetingSubmit = async (e) => {
+  const handleMeetingSubmit = async e => {
     e.preventDefault();
-    
+
     try {
       // Format date for API
       const formattedDate = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
-      
+
       const meetingData = {
         ...meetingDetails,
         date: formattedDate,
         time: selectedTimeSlot,
         friend_id: !isOwnCalendar && friendObj ? friendObj.id : null
       };
-      
+
       await bookMeeting(meetingData);
-      
+
       // Refresh events
-      const data = isOwnCalendar ? 
-        await getMyEvents() : 
-        await getFriendsAvailability(friendObj.id);
-      
+      const data = isOwnCalendar ? await getMyEvents() : await getColleaguesAvailability(friendObj.id);
+
       setEvents(data || []);
-      
+
       // Close form and reset
       setShowMeetingForm(false);
       setSelectedDate(null);
@@ -204,7 +202,6 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
         location: '',
         meetingType: 'online'
       });
-      
     } catch (error) {
       console.error('Error booking meeting:', error);
       // Handle error - could add state for error message
@@ -215,7 +212,7 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
     <div className="calendar-container">
       <div className="calendar-header">
         <div className="calendar-title">
-          {isOwnCalendar ? "My Calendar" : `${friendObj?.name}'s Availability`} - {formatMonth(currentMonth)}
+          {isOwnCalendar ? 'My Calendar' : `${friendObj?.name}'s Availability`} - {formatMonth(currentMonth)}
         </div>
         <div className="calendar-nav">
           <div className="calendar-nav-btn" onClick={prevMonth}>
@@ -243,7 +240,7 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
             <div
               key={index}
               className={`calendar-day ${day.date && isToday(day.date) ? 'today' : ''} ${day.events.length > 0 ? 'has-event' : ''} ${day.date && selectedDate && day.date.toDateString() === selectedDate.toDateString() ? 'selected' : ''}`}
-              style={{ 
+              style={{
                 visibility: day.date ? 'visible' : 'hidden',
                 cursor: day.date ? 'pointer' : 'default'
               }}
@@ -310,10 +307,12 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
                 {formatDate(selectedDate)} at {selectedTimeSlot}
               </div>
             </div>
-            
+
             <form onSubmit={handleMeetingSubmit}>
               <div className="form-row">
-                <label className="form-label" htmlFor="title">Meeting Title</label>
+                <label className="form-label" htmlFor="title">
+                  Meeting Title
+                </label>
                 <input
                   className="form-input"
                   type="text"
@@ -325,9 +324,11 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
                   required
                 />
               </div>
-              
+
               <div className="form-row">
-                <label className="form-label" htmlFor="attendees">Number of Attendees</label>
+                <label className="form-label" htmlFor="attendees">
+                  Number of Attendees
+                </label>
                 <input
                   className="form-input"
                   type="number"
@@ -339,7 +340,7 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
                   required
                 />
               </div>
-              
+
               <div className="form-row">
                 <label className="form-label">Meeting Type</label>
                 <div className="radio-group">
@@ -365,7 +366,7 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
                   </label>
                 </div>
               </div>
-              
+
               <div className="form-row">
                 <label className="form-label" htmlFor="location">
                   {meetingDetails.meetingType === 'online' ? 'Meeting Link' : 'Location'}
@@ -380,13 +381,9 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
                   placeholder={meetingDetails.meetingType === 'online' ? 'Zoom/Teams link' : 'Address or room number'}
                 />
               </div>
-              
+
               <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="btn-cancel"
-                  onClick={() => setShowMeetingForm(false)}
-                >
+                <button type="button" className="btn-cancel" onClick={() => setShowMeetingForm(false)}>
                   Cancel
                 </button>
                 <button type="submit" className="btn-confirm">

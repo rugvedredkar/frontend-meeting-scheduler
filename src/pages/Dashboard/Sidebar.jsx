@@ -1,19 +1,19 @@
 import { CalendarIcon, Clock, UserPlus, Plus, LogOut } from 'lucide-react';
-import { useState, useNavigate } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-// import UserDropDown from '../../components/user';
-
-function UserDropDown(user) {
+function UserDropDown({ user }) {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   // Handle logout
   const handleLogout = () => {
-    // In a real app, you would clear tokens, cookies, etc.
-    setIsLoggedIn(false);
+    // #### TO DO #####
+    // clear the auth token here
     // Navigate to login page
     navigate('/');
   };
+
+  console.log(user);
 
   return (
     <>
@@ -47,7 +47,7 @@ export default function SideBar({ activeTab, onTabChange, user }) {
             onClick={() => onTabChange('schedule')}
           >
             <Plus size={18} />
-            <span>schedule meet </span>
+            <span>Schedule Meet</span>
           </div>
           <div
             className={`sidebar-item ${activeTab === 'calendar' ? 'active' : ''}`}
@@ -68,14 +68,16 @@ export default function SideBar({ activeTab, onTabChange, user }) {
             onClick={() => onTabChange('friends')}
           >
             <UserPlus size={18} />
-            <span>Friends</span>
+            <span>Network</span>
           </div>
         </div>
 
         {/* User section at bottom of sidebar */}
         <div className="sidebar-footer">
           <div className={`sidebar-item user-item ${showUserMenu ? 'active' : ''}`} onClick={toggleUserMenu}>
-            <div className="user-avatar">{user.avatar}</div>
+            {/* <div className="user-avatar"> */}
+            <img className="user-avatar" src={user.picture} alt={''} />
+            {/* </div> */}
             <span>{user.name}</span>
           </div>
 

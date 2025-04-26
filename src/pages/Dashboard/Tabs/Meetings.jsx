@@ -21,6 +21,7 @@ function MeetingTile({ meeting }) {
     </div>
   );
 }
+
 export default function Meetings({ meetings }) {
   // add ongoing meeting, past meeting and also view meeting details section
   return (

@@ -12,21 +12,14 @@ export default function useDashboardData() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // const [userRes, friendsRes, meetingsRes] = await Promise.all([
-        //   getUser(),
-        //   getFriends(),
-        //   getMyEvents()
-        // ]);
 
         const userRes = await getUser();
         const friendsRes = await getFriends();
         const meetingsRes = await getMyEvents();
 
-        // console.log(friendsRes);
         setUser(userRes);
         setFriends(friendsRes);
         setMeetings(meetingsRes);
-        // console.log(friends);
       } catch (err) {
         console.error('Dashboard fetch failed:', err);
       } finally {
