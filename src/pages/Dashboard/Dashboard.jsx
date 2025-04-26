@@ -7,7 +7,7 @@ import Meetings from './Tabs/Meetings';
 import Friends from './Tabs/Friends';
 import Calendar from '../../components/calendar';
 
-import '../styles/Dashboard.css'
+import '../styles/Dashboard.css';
 import '../styles/Calendar.css';
 
 export default function Dashboard() {
@@ -15,12 +15,10 @@ export default function Dashboard() {
 
   const { user, friends, meetings, loading } = useDashboardData();
 
-  console.log(friends);
   const handleTabChange = tab => {
     setActiveTab(tab);
   };
 
-  console.log(friends);
   return (
     <>
       <div className="dashboard-container">
@@ -28,7 +26,7 @@ export default function Dashboard() {
         <div className="main-content">
           <SideBar activeTab={activetab} onTabChange={handleTabChange} user={user} />
           <div className="content-area">
-            {activetab === 'schedule' && <ScheduleMeet friends={friends} />}
+            {activetab === 'schedule' && <ScheduleMeet />}
             {activetab === 'calendar' && (
               <div className="calendar-area">
                 <Calendar isOwnCalendar={true} />

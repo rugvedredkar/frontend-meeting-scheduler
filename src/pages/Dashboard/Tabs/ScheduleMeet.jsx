@@ -1,10 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MinusSquare, User } from 'lucide-react';
 import Calendar from '../../../components/calendar';
+import { getRecents } from '../../../services/api';
 
-export default function ScheduleMeet({ friends, loading }) {
-  
+export default function ScheduleMeet() {
   const [selectedFriend, setSelectedFriend] = useState(null);
+  const [recentFriends, setRecentFriends] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function setFriends() {
+      const friendsRes = await getRecents();
+      setRecentFriends(friendsRes);
+      setLoading(false)
+    }
+    setFriends();
+  },[]);
+
+  console.log(recentFriends);
 
   return (
     <>
@@ -13,16 +26,12 @@ export default function ScheduleMeet({ friends, loading }) {
         <div className="friends-header">
           <span>My Friends </span>
           <div className="friends-actions">
-            <MinusSquare
-              size={18}
-              // onClick={() => setShowFriendsList(false)}
-              title="Minimize"
-            />
+            <MinusSquare size={18} title="Minimize" />
           </div>
         </div>
         {loading
           ? 'Loading...'
-          : friends.map(friend => (
+          : recentFriends.map(friend => (
               <div
                 key={friend.id}
                 className={`friend-item ${selectedFriend && selectedFriend.id === friend.id ? 'selected' : ''}`}
@@ -37,9 +46,7 @@ export default function ScheduleMeet({ friends, loading }) {
       </div>
 
       <div className="calendar-area">
-        {selectedFriend && (
-          <Calendar isOwnCalendar={false} friendObj={friends.filter(friend => friend.id === selectedFriend)} />
-        )}
+        {selectedFriend && <Calendar isOwnCalendar={false} friendObj={selectedFriend} />}
         {!selectedFriend && <div className="empty-state">Select a friend to schedule with</div>}
       </div>
     </>
