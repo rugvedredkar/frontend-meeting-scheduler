@@ -197,6 +197,25 @@ export async function getSuggestedFriends(quantity = 5) {
   return availableFriends;
 }
 
+export async function getSearchResults(query) {
+  const idToken = localStorage.getItem('token');
+
+  if (!idToken) {
+    throw new Error('No auth token found. Please log in again.');
+  }
+
+  const res = await fetch(`${API_BASE}/search-users?query=${query}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${idToken}`
+    }
+  });
+
+  const users = await res.json();
+
+  console.log(users);
+  return users;
+}
 
 
 

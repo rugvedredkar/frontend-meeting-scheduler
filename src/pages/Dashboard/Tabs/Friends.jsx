@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Search, User } from 'lucide-react';
 import { getFriends, getSuggestedFriends } from '../../../services/api';
+import { getSearchResults } from '../../../services/api';
 
 function AddFriendTile({ friend }) {
   return (
@@ -42,16 +43,19 @@ export function MyFriendsList({ friends }) {
 }
 
 export default function Friends() {
+
   const [tab, setTab] = useState('addConnection');
   const [myFriends, setMyFriends] = useState(null);
+
+  const [query, setQuery] = useState('');
   const [searchedFreinds, setSearchedFreinds] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState(false);
+
   const [suggestedFriends, setSuggestedFriends] = useState(null);
-
-  // ### TO DO ###
-  // add loading and error ui
   const [suggestErr, setSuggestErr] = useState(false);
-  const [loading, setLoading] = useState(true);
-
+  const [suggestLoading, setSuggestLoading] = useState(true);
+  
   useEffect(() => {
     async function fetchData() {
       try {
@@ -61,18 +65,32 @@ export default function Friends() {
         const myFriendsRes = await getFriends();
         setMyFriends(myFriendsRes);
       } catch (err) {
-        setSuggestErr(false);
-        console.error(err);
+        setSuggestErr(true);
+        // console.error(err);
       } finally {
-        setLoading(false);
-        console.log(suggestedFriends);
+        setSuggestLoading(false);
+        // console.log(suggestedFriends);
       }
     }
 
     fetchData();
   }, []);
 
-  const search = async () => {};
+  const search = async () => {
+    setSearchLoading(true);
+    try {
+      const searchRes = await getSearchResults(query);
+      console.log(searchRes);
+      setQuery('');
+      setSearchedFreinds(searchRes); 
+    } catch(err) {
+      setSearchError(true);
+    } finally {
+      setSearchLoading(false);
+      setSearchError(false);
+    }
+    
+  };
 
   return (
     <>
@@ -106,27 +124,49 @@ export default function Friends() {
                 <div className="search-icon">
                   <Search size={18} />
                 </div>
-                <input type="text" placeholder="Search for new connections" className="search-input" />
+                <input 
+                  type="text" 
+                  placeholder="Search for new connections" 
+                  className="search-input"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)} />
                 <button className="search-button" onClick={search}>
                   Search
                 </button>
               </div>
 
               <div className="search-results">
-                {!loading && searchedFreinds.map(friend => <AddFriendTile friend={friend} />)}
-
+                {/* Add better loading animation */}
+                {searchLoading && (
+                  <>
+                  Searching...
+                  <p>-----</p>
+                  <p></p>
+                  </>
+                )}
+                {!searchLoading && !searchError && searchedFreinds.map(friend => {
+                  return <AddFriendTile friend={friend} />})
+                }
+                {searchError && (
+                  <>
+                  Error
+                  <p>-----</p>
+                  <p></p>
+                  </>
+                )}
                 <h3 key={'title'} className="results-title">
                   Add to your network
                 </h3>
                 {console.log(suggestedFriends)}
-                {!loading && suggestedFriends.map(friend => <AddFriendTile friend={friend} />)}
+                {!suggestLoading && suggestedFriends.map(friend => <AddFriendTile friend={friend} />)}
               </div>
             </>
           )}
 
           {/* My Freinds Tab */}
-          {loading && <div>'Loading...'</div>}
-          {!loading && tab === 'myNetwork' && <MyFriendsList friends={myFriends} />}
+          {suggestLoading && <div>'Loading...'</div>}
+          {!suggestLoading && tab === 'myNetwork' && <MyFriendsList friends={myFriends} />}
+          {/* {suggestErr && 'Error Getting Suggested Friends'} */}
         </div>
       </div>
     </>
