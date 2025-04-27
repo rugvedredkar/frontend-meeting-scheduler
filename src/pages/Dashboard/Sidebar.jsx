@@ -1,4 +1,4 @@
-import { CalendarIcon, Clock, UserPlus, Plus, LogOut } from 'lucide-react';
+import { CalendarIcon, Clock, UserPlus, Plus, LogOut, MessageSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUser } from '../../services/api';
@@ -52,13 +52,13 @@ export default function SideBar({ activeTab, onTabChange }) {
       {/* Sidebar */}
       <div className="sidebar">
         <div className="sidebar-menu">
-          <div
+          {/* <div
             className={`sidebar-item ${activeTab === 'schedule' ? 'active' : ''}`}
             onClick={() => onTabChange('schedule')}
           >
             <Plus size={18} />
             <span>Schedule Meet</span>
-          </div>
+          </div> */}
           <div
             className={`sidebar-item ${activeTab === 'calendar' ? 'active' : ''}`}
             onClick={() => onTabChange('calendar')}
@@ -79,6 +79,13 @@ export default function SideBar({ activeTab, onTabChange }) {
           >
             <UserPlus size={18} />
             <span>Network</span>
+          </div>
+          <div
+            className={`sidebar-item ${activeTab === 'aichat' ? 'active' : ''}`}
+            onClick={() => onTabChange('aichat')}
+          >
+            <MessageSquare size={18} />
+            <span>AI Chat</span>
           </div>
         </div>
 
