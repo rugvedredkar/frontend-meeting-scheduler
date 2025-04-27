@@ -13,7 +13,7 @@ import '../styles/Calendar.css';
 export default function Dashboard() {
   const [activetab, setActiveTab] = useState('calendar');
 
-  const { user, friends, meetings, loading } = useDashboardData();
+  // const { user} = useDashboardData();
 
   const handleTabChange = tab => {
     setActiveTab(tab);
@@ -24,7 +24,7 @@ export default function Dashboard() {
       <div className="dashboard-container">
         {/* Main Content */}
         <div className="main-content">
-          <SideBar activeTab={activetab} onTabChange={handleTabChange} user={user} />
+          <SideBar activeTab={activetab} onTabChange={handleTabChange} />
           <div className="content-area">
             {activetab === 'schedule' && <ScheduleMeet />}
             {activetab === 'calendar' && (
@@ -32,8 +32,8 @@ export default function Dashboard() {
                 <Calendar isOwnCalendar={true} />
               </div>
             )}
-            {activetab === 'meetings' && <Meetings meetings={meetings} />}
-            {activetab === 'friends' && <Friends myFriends={friends} loading={loading} />}
+            {activetab === 'meetings' && <Meetings />}
+            {activetab === 'friends' && <Friends />}
           </div>
         </div>
       </div>

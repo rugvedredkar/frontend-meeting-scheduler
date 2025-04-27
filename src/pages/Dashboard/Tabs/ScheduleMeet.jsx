@@ -12,12 +12,10 @@ export default function ScheduleMeet() {
     async function setFriends() {
       const friendsRes = await getRecents();
       setRecentFriends(friendsRes);
-      setLoading(false)
+      setLoading(false);
     }
     setFriends();
-  },[]);
-
-  console.log(recentFriends);
+  }, []);
 
   return (
     <>

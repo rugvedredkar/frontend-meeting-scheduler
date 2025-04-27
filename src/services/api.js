@@ -1,5 +1,5 @@
-import { jwtDecode } from "jwt-decode";
-const API_BASE = 'http://10.0.0.80:8080'; // Change this if you're deployed
+import { jwtDecode } from 'jwt-decode';
+const API_BASE = 'http://10.0.0.243:8080'; // Change this if you're deployed
 
 /*
  * Gets the user info
@@ -196,6 +196,14 @@ export async function getSuggestedFriends(quantity = 5) {
 
   return availableFriends;
 }
+
+
+
+
+
+// ---------------------------------
+// THESE FUNCTIONS ARE NOT RIGHT
+// ---------------------------------
 
 // New function to check available time slots for a specific date
 export async function checkAvailability(date, friendId = null) {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Search, User } from 'lucide-react';
-import { getSuggestedFriends } from '../../../services/api';
+import { getFriends, getSuggestedFriends } from '../../../services/api';
 
 function AddFriendTile({ friend }) {
   return (
@@ -41,8 +41,9 @@ export function MyFriendsList({ friends }) {
   );
 }
 
-export default function Friends({ myFriends }) {
+export default function Friends() {
   const [tab, setTab] = useState('addConnection');
+  const [myFriends, setMyFriends] = useState(null);
   const [searchedFreinds, setSearchedFreinds] = useState([]);
   const [suggestedFriends, setSuggestedFriends] = useState(null);
 
@@ -56,6 +57,9 @@ export default function Friends({ myFriends }) {
       try {
         const suggestedFreindsRes = await getSuggestedFriends(7);
         setSuggestedFriends(suggestedFreindsRes);
+
+        const myFriendsRes = await getFriends();
+        setMyFriends(myFriendsRes);
       } catch (err) {
         setSuggestErr(false);
         console.error(err);

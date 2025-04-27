@@ -293,9 +293,7 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
                 >
                   <Clock size={16} className="time-slot-icon" />
                   <span>{slot.time}</span>
-                  <span className="availability-indicator">
-                    {slot.available ? 'Available' : 'Unavailable'}
-                  </span>
+                  <span className="availability-indicator">{slot.available ? 'Available' : 'Unavailable'}</span>
                 </div>
               ))}
             </div>
@@ -346,9 +344,11 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
                   required
                 />
               </div>
-              
+
               <div className="form-row">
-                <label className="form-label" htmlFor="email">Email Address</label>
+                <label className="form-label" htmlFor="email">
+                  Email Address
+                </label>
                 <input
                   className="form-input"
                   type="email"
@@ -360,7 +360,7 @@ export default function Calendar({ isCalendarTab = false, isOwnCalendar = true, 
                   required
                 />
               </div>
-              
+
               <div className="form-row">
                 <label className="form-label">Meeting Type</label>
                 <div className="radio-group">

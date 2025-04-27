@@ -1,5 +1,6 @@
 import { Calendar as CalendarIcon, User, Clock } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getMyEvents } from '../../../services/api';
 
 function MeetingTile({ meeting }) {
   return (
@@ -23,21 +24,52 @@ function MeetingTile({ meeting }) {
   );
 }
 
-export default function Meetings({ meetings = [], meetingRequests = [], meetingsSent = [] }) {
+export default function Meetings() {
+  // ## TO DO ## get these dynamically
+  // const meetings = [];
+  // const meetingRequests = [];
+  // const meetingsSent = [];
+
   const [activeTab, setActiveTab] = useState(0);
-  
+  const [meetings, setMeetings] = useState(null);
+  const [meetingRequests, setMeetingRequests] = useState(null);
+  const [meetingsSent, setMeetingsSent] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      const eventRes = await getMyEvents();
+      console.log(eventRes);
+
+      const meetingsRes = eventRes.filter(meeting => meeting.meeting_status === 'CONFIRMED');
+      // ## TO DO ## this one is tricky, this won't be in my Events // for now setting it my my events
+      // const meetingRequestsRes = eventRes.filter((meeting) => meeting.meeting_status === '')
+      const meetingsSentRes = eventRes.filter(
+        meeting => meeting.meeting_status === 'SENT' || meeting.meeting_status === 'CANCELED'
+      );
+
+      setMeetings(meetingsRes);
+      setMeetingRequests(eventRes);
+      setMeetingsSent(meetingsSentRes);
+
+    }
+
+    fetchData();
+  }, []);
+
   const tabs = [
     { title: "My Scheduled Meetings", data: meetings },
     { title: "Meeting Requests", data: meetingRequests },
     { title: "Meetings Sent", data: meetingsSent }
   ];
 
+  console.log(tabs[0].data);
+
   return (
     <div className="calendar-area">
       <div className="meetings-container">
         <div className="meetings-tabs">
           {tabs.map((tab, index) => (
-            <div 
+            <div
               key={index}
               className={`meetings-tab ${activeTab === index ? 'active' : ''}`}
               onClick={() => setActiveTab(index)}
@@ -46,8 +78,8 @@ export default function Meetings({ meetings = [], meetingRequests = [], meetings
             </div>
           ))}
         </div>
-        
-        {tabs.map((tab, index) => (
+        {!tabs[activeTab].data && 'Loading...'}
+        {tabs[activeTab].data && tabs.map((tab, index) => (
           <div key={index} className={`meetings-section ${activeTab === index ? 'active' : ''}`}>
             <h2 className="meetings-title">{tab.title}</h2>
             {tab.data.length > 0 ? (

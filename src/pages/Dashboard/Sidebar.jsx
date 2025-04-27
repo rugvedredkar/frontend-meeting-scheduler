@@ -1,6 +1,7 @@
 import { CalendarIcon, Clock, UserPlus, Plus, LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getUser } from '../../services/api';
 
 function UserDropDown({ user }) {
   const navigate = useNavigate();
@@ -32,10 +33,19 @@ function UserDropDown({ user }) {
   );
 }
 
-export default function SideBar({ activeTab, onTabChange, user }) {
+export default function SideBar({ activeTab, onTabChange }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [user, setUser] = useState(null);
 
   const toggleUserMenu = () => setShowUserMenu(!showUserMenu);
+
+  useEffect(() => {
+    async function fetchData() {
+      const userRes = await getUser();
+      setUser(userRes);
+    }
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -76,9 +86,14 @@ export default function SideBar({ activeTab, onTabChange, user }) {
         <div className="sidebar-footer">
           <div className={`sidebar-item user-item ${showUserMenu ? 'active' : ''}`} onClick={toggleUserMenu}>
             {/* <div className="user-avatar"> */}
-            <img className="user-avatar" src={user.picture} alt={''} />
-            {/* </div> */}
-            <span>{user.name}</span>
+
+            {!user && 'Loading...'}
+            {user && (
+              <>
+                <img className="user-avatar" src={user.picture} alt={''} />
+                <span>{user.name}</span>
+              </>
+            )}
           </div>
 
           {/* User dropdown menu */}
