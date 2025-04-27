@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Search, User } from 'lucide-react';
-import { getFriends, getSuggestedFriends } from '../../../services/api';
+import { getConnectionRequests, getFriends, getSuggestedFriends } from '../../../services/api';
 import { getSearchResults } from '../../../services/api';
 
 function AddFriendTile({ friend }) {
@@ -20,6 +20,22 @@ function AddFriendTile({ friend }) {
   );
 }
 
+function MyFriendTile({ friend }) {
+  return (
+    <>
+      <div key={friend.id} className="user-result">
+        <div className="user-avatar">
+          <User size={20} />
+        </div>
+        <div className="user-info">
+          <div className="user-name">{friend.name}</div>
+        </div>
+        <button className="remove-button">Remove</button>
+      </div>
+    </>
+  );
+}
+
 export function MyFriendsList({ friends }) {
   return (
     <>
@@ -27,15 +43,7 @@ export function MyFriendsList({ friends }) {
         <h3 className="results-title">My Current Friends</h3>
 
         {friends.map(friend => (
-          <div key={friend.id} className="user-result">
-            <div className="user-avatar">
-              <User size={20} />
-            </div>
-            <div className="user-info">
-              <div className="user-name">{friend.name}</div>
-            </div>
-            <button className="remove-button">Remove</button>
-          </div>
+          <MyFriendTile friend={friend} />
         ))}
       </div>
     </>
@@ -43,19 +51,20 @@ export function MyFriendsList({ friends }) {
 }
 
 export default function Friends() {
-
   const [tab, setTab] = useState('addConnection');
-  const [myFriends, setMyFriends] = useState(null);
 
+  // search friends
   const [query, setQuery] = useState('');
   const [searchedFreinds, setSearchedFreinds] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState(false);
 
+  const [myFriends, setMyFriends] = useState(null);
   const [suggestedFriends, setSuggestedFriends] = useState(null);
-  const [suggestErr, setSuggestErr] = useState(false);
-  const [suggestLoading, setSuggestLoading] = useState(true);
-  
+  const [connRequests, setConnRequests] = useState([]);
+  const [err, setErr] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -64,12 +73,14 @@ export default function Friends() {
 
         const myFriendsRes = await getFriends();
         setMyFriends(myFriendsRes);
+
+        const myFriendRequests = await getConnectionRequests();
+        setConnRequests(myFriendRequests);
       } catch (err) {
-        setSuggestErr(true);
-        // console.error(err);
+        setErr(true);
       } finally {
-        setSuggestLoading(false);
-        // console.log(suggestedFriends);
+        setLoading(false);
+        setErr(false);
       }
     }
 
@@ -82,14 +93,13 @@ export default function Friends() {
       const searchRes = await getSearchResults(query);
       console.log(searchRes);
       setQuery('');
-      setSearchedFreinds(searchRes); 
-    } catch(err) {
+      setSearchedFreinds(searchRes);
+    } catch (err) {
       setSearchError(true);
     } finally {
       setSearchLoading(false);
       setSearchError(false);
     }
-    
   };
 
   return (
@@ -124,12 +134,13 @@ export default function Friends() {
                 <div className="search-icon">
                   <Search size={18} />
                 </div>
-                <input 
-                  type="text" 
-                  placeholder="Search for new connections" 
+                <input
+                  type="text"
+                  placeholder="Search for new connections"
                   className="search-input"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)} />
+                  onChange={e => setQuery(e.target.value)}
+                />
                 <button className="search-button" onClick={search}>
                   Search
                 </button>
@@ -137,36 +148,29 @@ export default function Friends() {
 
               <div className="search-results">
                 {/* Add better loading animation */}
-                {searchLoading && (
-                  <>
-                  Searching...
-                  <p>-----</p>
-                  <p></p>
-                  </>
-                )}
-                {!searchLoading && !searchError && searchedFreinds.map(friend => {
-                  return <AddFriendTile friend={friend} />})
-                }
-                {searchError && (
-                  <>
-                  Error
-                  <p>-----</p>
-                  <p></p>
-                  </>
-                )}
+                {searchLoading && <div>Loading</div>}
+                {!searchLoading &&
+                  !searchError &&
+                  searchedFreinds.map(friend => {
+                    return <AddFriendTile friend={friend} />;
+                  })}
+                {searchError && <div>Error</div>}
                 <h3 key={'title'} className="results-title">
                   Add to your network
                 </h3>
-                {console.log(suggestedFriends)}
-                {!suggestLoading && suggestedFriends.map(friend => <AddFriendTile friend={friend} />)}
+                {!loading && suggestedFriends.map(friend => <AddFriendTile friend={friend} />)}
               </div>
             </>
           )}
 
+          {/* Connection Requests Tab */}
+          {loading && <div>'Loading...'</div>}
+          {!loading && tab === 'connectionRequests' && connRequests.map((friend) => <AddFriendTile friend={friend}/>)}
+
           {/* My Freinds Tab */}
-          {suggestLoading && <div>'Loading...'</div>}
-          {!suggestLoading && tab === 'myNetwork' && <MyFriendsList friends={myFriends} />}
-          {/* {suggestErr && 'Error Getting Suggested Friends'} */}
+          {loading && <div>'Loading...'</div>}
+          {!loading && tab === 'myNetwork' && <MyFriendsList friends={myFriends} />}
+          {err && 'Error Getting Your Connection'}
         </div>
       </div>
     </>

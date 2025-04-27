@@ -1,6 +1,6 @@
 import { Calendar as CalendarIcon, User, Clock } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { getMyEvents } from '../../../services/api';
+import { getMyEventRequests, getMyEvents } from '../../../services/api';
 
 function MeetingTile({ meeting }) {
   return (
@@ -25,10 +25,6 @@ function MeetingTile({ meeting }) {
 }
 
 export default function Meetings() {
-  // ## TO DO ## get these dynamically
-  // const meetings = [];
-  // const meetingRequests = [];
-  // const meetingsSent = [];
 
   const [activeTab, setActiveTab] = useState(0);
   const [meetings, setMeetings] = useState(null);
@@ -41,25 +37,23 @@ export default function Meetings() {
       console.log(eventRes);
 
       const meetingsRes = eventRes.filter(meeting => meeting.meeting_status === 'CONFIRMED');
-      // ## TO DO ## this one is tricky, this won't be in my Events // for now setting it my my events
-      // const meetingRequestsRes = eventRes.filter((meeting) => meeting.meeting_status === '')
       const meetingsSentRes = eventRes.filter(
         meeting => meeting.meeting_status === 'SENT' || meeting.meeting_status === 'CANCELED'
       );
+      const meetingRequestsRes = await getMyEventRequests();
 
       setMeetings(meetingsRes);
-      setMeetingRequests(eventRes);
+      setMeetingRequests(meetingRequestsRes);
       setMeetingsSent(meetingsSentRes);
-
     }
 
     fetchData();
   }, []);
 
   const tabs = [
-    { title: "My Scheduled Meetings", data: meetings },
-    { title: "Meeting Requests", data: meetingRequests },
-    { title: "Meetings Sent", data: meetingsSent }
+    { title: 'My Scheduled Meetings', data: meetings },
+    { title: 'Meeting Requests', data: meetingRequests },
+    { title: 'Meetings Sent', data: meetingsSent }
   ];
 
   console.log(tabs[0].data);
@@ -79,20 +73,21 @@ export default function Meetings() {
           ))}
         </div>
         {!tabs[activeTab].data && 'Loading...'}
-        {tabs[activeTab].data && tabs.map((tab, index) => (
-          <div key={index} className={`meetings-section ${activeTab === index ? 'active' : ''}`}>
-            <h2 className="meetings-title">{tab.title}</h2>
-            {tab.data.length > 0 ? (
-              <div className="meetings-list">
-                {tab.data.map(meeting => (
-                  <MeetingTile key={meeting.id} meeting={meeting} />
-                ))}
-              </div>
-            ) : (
-              <div className="empty-meetings">No {tab.title.toLowerCase()}</div>
-            )}
-          </div>
-        ))}
+        {tabs[activeTab].data &&
+          tabs.map((tab, index) => (
+            <div key={index} className={`meetings-section ${activeTab === index ? 'active' : ''}`}>
+              <h2 className="meetings-title">{tab.title}</h2>
+              {tab.data.length > 0 ? (
+                <div className="meetings-list">
+                  {tab.data.map(meeting => (
+                    <MeetingTile key={meeting.id} meeting={meeting} />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-meetings">No {tab.title.toLowerCase()}</div>
+              )}
+            </div>
+          ))}
       </div>
     </div>
   );

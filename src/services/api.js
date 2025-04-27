@@ -78,6 +78,29 @@ export async function getMyEvents() {
   return resObj;
 }
 
+export async function getMyEventRequests() {
+  const idToken = localStorage.getItem('token');
+
+  if (!idToken) {
+    throw new Error('No auth token found. Please log in again.');
+  }
+
+  const res = await fetch(`${API_BASE}/event-requests`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${idToken}`
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch protected data');
+  }
+
+  const { events: resObj } = await res.json();
+
+  return resObj;
+}
+
 /* 
  * Get request to """/colleagues-availability"""
  * This request gets events of user with user_id == colleagues_id
@@ -213,14 +236,29 @@ export async function getSearchResults(query) {
 
   const users = await res.json();
 
-  console.log(users);
   return users;
 }
 
+export async function getConnectionRequests() {
+  const idToken = localStorage.getItem('token');
 
+  if (!idToken) {
+    throw new Error('No auth token found. Please log in again.');
+  }
 
+  const res = await fetch(`${API_BASE}/friend-requests`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${idToken}`
+    }
+  });
 
-// ---------------------------------
+  const connRequests = await res.json();
+
+  return connRequests;
+}
+
+// --------------------------------
 // THESE FUNCTIONS ARE NOT RIGHT
 // ---------------------------------
 
