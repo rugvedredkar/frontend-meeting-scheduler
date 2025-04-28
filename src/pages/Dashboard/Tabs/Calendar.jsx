@@ -35,7 +35,8 @@ export default function Calendar() {
       setLoading(true);
       try {
         const data = await getMyEvents();
-        setEvents(data || []);
+        
+        setEvents(data.filter((event) => event.meeting_status !== 'CANCELED')|| []);
       } catch (error) {
         console.error('Error fetching events:', error);
         setEvents([]);
