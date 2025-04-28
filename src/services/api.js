@@ -1,5 +1,5 @@
 import { jwtDecode } from 'jwt-decode';
-const API_BASE = 'https://server-meeting-scheduler.onrender.com/'; // Change this if you're deployed
+const API_BASE = 'http://18.191.62.47'; // Change this if you're deployed
 
 /*
  * Gets the user info
