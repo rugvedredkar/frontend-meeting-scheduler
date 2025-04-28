@@ -151,7 +151,7 @@ function UserTile({ friend, onStatusChange, initialStatus = null }) {
 export function MyFriendsList({ friends, onUpdate }) {
   return (
     <div className="my-friends-list">
-      <h3 className="results-title">My Current Friends</h3>
+      {/* <h3 className="results-title">My Current Friends</h3> */}
       {friends.length === 0 ? (
         <div className="no-friends">You don't have any connections yet.</div>
       ) : (
@@ -333,7 +333,7 @@ export default function Friends() {
           {/* Connection Requests Tab */}
           {tab === 'connectionRequests' && (
             <div className="connection-requests">
-              <h3 className="results-title">Friend Requests</h3>
+              {/* <h3 className="results-title">Friend Requests</h3> */}
               {loading ? (
                 <div className="loading-message">Loading requests...</div>
               ) : (
@@ -347,7 +347,7 @@ export default function Friends() {
                     />
                   ))
                 ) : (
-                  <div className="no-requests">No pending friend requests</div>
+                  <div className="no-requests">No pending connection requests</div>
                 )
               )}
             </div>

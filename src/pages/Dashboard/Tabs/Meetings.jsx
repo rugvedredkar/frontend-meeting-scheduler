@@ -420,7 +420,7 @@ export default function Meetings() {
         {tabs[activeTab].data &&
           tabs.map((tab, index) => (
             <div key={index} className={`meetings-section ${activeTab === index ? 'active' : ''}`}>
-              <h2 className="meetings-title">{tab.title}</h2>
+              {/* <h2 className="meetings-title">{tab.title}</h2> */}
               {tab.data.length > 0 ? (
                 <div className="meetings-list">
                   {tab.data.map(meeting => (
