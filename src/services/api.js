@@ -1,6 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
 const API_BASE = 'http://18.191.62.47'; // prod
-// const API_BASE = 'http://10.0.0.243:8080' // dev 
+//const API_BASE = 'http://10.0.0.243:8080' // dev 
 
 /*
  * Gets the user info

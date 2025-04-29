@@ -44,7 +44,7 @@ export default function LoginPage() {
             <div className="app-icon">
               <Calendar size={48} />
             </div>
-            <h1 className="app-title">ScheduLy.com</h1>
+            <h1 className="app-title">Schedulerr.com</h1>
             <p className="app-subtitle">Sign in to access your calendar</p>
           </div>
 
