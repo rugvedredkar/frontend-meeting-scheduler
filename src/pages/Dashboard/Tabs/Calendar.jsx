@@ -254,7 +254,8 @@ export default function Calendar() {
       setShowSuccess(true);
       // Refresh events
       const updatedEvents = await getMyEvents();
-      setEvents(updatedEvents || []);
+      // ## PART OF A FIX ##
+      setEvents(updatedEvents.filter((event) => event.meeting_status !== 'CANCELED') || []);
       // Close form and reset
       setShowEventForm(false);
       setNewEvent({
