@@ -275,8 +275,27 @@ export default function Meetings() {
             }
           }));
           
-          // Format attendee names for "with" field
-          const formatAttendeeNames = (meeting) => {
+          // Helper function to get meeting's attendee status for current user
+          const getUserStatusInMeeting = async (meeting) => {
+            try {
+              // If user is owner, they don't have a status as an attendee
+              if (isOwner(meeting)) return null;
+              
+              // Get all attendee statuses for the meeting
+              const attendeeStatusData = await getEventAttendeeStatus(meeting.id);
+              const attendees = attendeeStatusData.attendees || [];
+              
+              // Find the current user's status
+              const userAttendeeInfo = attendees.find(a => a.user_id === userId);
+              return userAttendeeInfo ? userAttendeeInfo.status : 'REQUESTED';
+            } catch (error) {
+              console.error(`Error getting user status for meeting ${meeting.id}:`, error);
+              return 'UNKNOWN';
+            }
+          };
+          
+          // Format attendee names for "with" field and process each meeting
+          const processMeeting = async (meeting) => {
             const attendeeNames = (meeting.attendees || [])
               .filter(id => id !== userId)
               .map(id => userCache.current[id]?.name?.split(' ')[0] || 'Unknown');
@@ -289,31 +308,50 @@ export default function Meetings() {
               organizerName = userCache.current[meeting.user]?.name || 'Unknown';
             }
             
+            // Get user's status in this meeting (only if not the owner)
+            const userStatus = await getUserStatusInMeeting(meeting);
+            
             return {
               ...meeting,
               with: withStr,
               organizer_name: organizerName,
-              isOwner: isOwner(meeting)
+              isOwner: isOwner(meeting),
+              userStatus: userStatus
             };
           };
           
-          // Process all meetings with user info
-          const processedMeetings = allMeetings.map(formatAttendeeNames);
-          const processedRequests = meetingRequestsData.map(formatAttendeeNames);
+          // Process all meetings with attendee info
+          const processedMeetingsPromises = allMeetings.map(processMeeting);
+          const processedRequestsPromises = meetingRequestsData.map(processMeeting);
+          
+          const processedMeetings = await Promise.all(processedMeetingsPromises);
+          const processedRequests = await Promise.all(processedRequestsPromises);
           
           // MY SCHEDULED MEETINGS:
           // 1. You are the owner AND meeting is CONFIRMED
-          // 2. You are an attendee (not owner) AND meeting is CONFIRMED
+          // 2. You are an attendee (not owner), have ACCEPTED and meeting is CONFIRMED
           const scheduledMeetings = processedMeetings.filter(meeting => 
-            meeting.meeting_status === 'CONFIRMED' && 
-            (isOwner(meeting) || !isOwner(meeting)) // Both your meetings and others you've accepted
+            (isOwner(meeting) && meeting.meeting_status === 'CONFIRMED') || // Your confirmed meetings
+            (!isOwner(meeting) && meeting.meeting_status === 'CONFIRMED' && meeting.userStatus === 'ACCEPTED') // Accepted and confirmed meetings
           );
           
           // MEETING REQUESTS:
-          // Meetings where you're an attendee (not owner)
-          // Both pending and rejected are shown
-          const requests = processedRequests.filter(meeting => 
-            !isOwner(meeting) // Not meetings you created
+          // 1. You are an attendee (not owner) with any status EXCEPT 'ACCEPTED' meetings that are 'CONFIRMED'
+          // 2. This includes: meetings you've rejected (regardless of confirmation status)
+          //    and meetings you've accepted but aren't confirmed yet
+          const requests = [
+            ...processedRequests.filter(meeting => !isOwner(meeting)),
+            ...processedMeetings.filter(meeting => 
+              !isOwner(meeting) && 
+              (meeting.userStatus === 'REJECTED' || // Rejected meetings (any status)
+               (meeting.userStatus === 'ACCEPTED' && meeting.meeting_status !== 'CONFIRMED') || // Accepted but not confirmed
+               (meeting.userStatus === 'REQUESTED')) // Not responded to yet
+            )
+          ];
+          
+          // Remove duplicates (a meeting might appear in both arrays)
+          const uniqueRequests = Array.from(
+            new Map(requests.map(item => [item.id, item])).values()
           );
           
           // MEETINGS SENT:
@@ -325,7 +363,7 @@ export default function Meetings() {
           
           // Update state with processed meetings
           setMeetings(scheduledMeetings);
-          setMeetingRequests(requests);
+          setMeetingRequests(uniqueRequests);
           setMeetingsSent(sentMeetings);
         };
         
