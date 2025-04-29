@@ -71,8 +71,8 @@ function MeetingDetailsModal({ meeting, currentUserId, onClose, onAction, action
   
   // Owners can confirm or cancel meetings
   const showConfirmCancel = isOwner && 
-                          (meeting.meeting_status === 'SENT' || 
-                           meeting.meeting_status === 'CONFIRMED');
+                           (meeting.meeting_status === 'SENT' || 
+                            meeting.meeting_status === 'CONFIRMED');
   
   // Attendees can accept or reject meeting invitations (if not canceled)
   const showAcceptReject = !isOwner && meeting.meeting_status !== 'CANCELED';
@@ -105,7 +105,7 @@ function MeetingDetailsModal({ meeting, currentUserId, onClose, onAction, action
             <VenueDisplay venue={meeting.venue} />
             {meeting.description && (
               <div className="meeting-description">
-                <b>Description:</b>x
+                <b>Description:</b>
                 <p>{meeting.description}</p>
               </div>
             )}
@@ -227,95 +227,114 @@ export default function Meetings() {
   }, []);
 
   // Fetch user data, meetings, and requests
-  // TO DO // ### FIX THE bug d
   useEffect(() => {
     async function fetchData() {
-      const user = await getUser();
-      const userId = user?.sub || user?.id || user?.email;
-      setCurrentUserId(userId);
-      const eventRes = await getMyEvents();
-      const meetingRequestsRes = await getMyEventRequests();
-      
-      // Helper to check if user is the owner/creator of the meeting
-      const isOwner = meeting => meeting.user === userId;
-      
-      // "My Scheduled Meetings":
-      // 1. Meetings you created that are CONFIRMED
-      // 2. Meetings where you're an attendee and that you've ACCEPTED and are CONFIRMED
-      const scheduledMeetings = eventRes.filter(m => 
-        (m.meeting_status === 'CONFIRMED' && isOwner(m)) || // Your created, confirmed meetings
-        (m.meeting_status === 'CONFIRMED' && !isOwner(m))   // Others' meetings you accepted that are confirmed
-      );
-      
-      // "Meeting Requests":
-      // Meetings where you're an attendee and need to accept/reject
-      // (These come from the getMyEventRequests API)
-      
-      // "Meetings Sent":
-      // Meetings you created that are SENT or CANCELED
-      const sentMeetings = eventRes.filter(m => 
-        isOwner(m) && (m.meeting_status === 'SENT' || m.meeting_status === 'CANCELED')
-      );
-      
-      // Set initial data
-      setMeetings(scheduledMeetings);
-      setMeetingsSent(sentMeetings);
-      setMeetingRequests(meetingRequestsRes.filter((event) => event.user !== userId));
-      
-      // Get all unique attendee IDs and owner IDs
-      const allMeetings = [...scheduledMeetings, ...sentMeetings, ...meetingRequestsRes];
-      const allUserIds = new Set();
-      
-      // Track attendees
-      allMeetings.forEach(m => {
-        // Add attendees (excluding self)
-        (m.attendees || []).forEach(id => { 
-          if (id !== userId) allUserIds.add(id); 
-        });
+      try {
+        const user = await getUser();
+        const userId = user?.sub || user?.id || user?.email;
+        setCurrentUserId(userId);
         
-        // Add owner (if not self)
-        if (m.user && m.user !== userId) {
-          allUserIds.add(m.user);
-        }
-      });
-      
-      // Fetch user info for each unique user ID (cache results)
-      await Promise.all(Array.from(allUserIds).map(async id => {
-        if (!userCache.current[id]) {
-          try {
-            userCache.current[id] = await getUserById(id);
-          } catch {
-            userCache.current[id] = { name: 'Unknown', id };
-          }
-        }
-      }));
-      
-      // Helper to get attendee names for a meeting
-      const getAttendeeNames = (attendees) => (attendees || [])
-        .filter(id => id !== userId) // exclude self from "with" display
-        .map(id => userCache.current[id]?.name?.split(' ')[0] || 'Unknown');
-      
-      // Format meetings with additional fields
-      const formatMeetings = arr => arr.map(meeting => {
-        const withStr = formatMeetingWith(getAttendeeNames(meeting.attendees));
+        // Get all meetings (includes both owned and attending)
+        const allMeetings = await getMyEvents();
+        // Get meeting requests specifically
+        const meetingRequestsData = await getMyEventRequests();
         
-        // Set organizer name if not the current user
-        let organizerName = 'You';
-        if (!isOwner(meeting) && meeting.user) {
-          organizerName = userCache.current[meeting.user]?.name || 'Unknown';
-        }
+        console.log("All meetings:", allMeetings);
+        console.log("Meeting requests:", meetingRequestsData);
         
-        return { 
-          ...meeting, 
-          with: withStr,
-          isOwner: isOwner(meeting),
-          organizer_name: organizerName
+        // Helper to check if user is the owner/creator of the meeting
+        const isOwner = meeting => meeting.user === userId;
+        
+        // Helper to get attendee names and organizer info
+        const processUserInfo = async () => {
+          // Collect all unique user IDs from all meetings (owners + attendees)
+          const allUserIds = new Set();
+          
+          // For all meetings add the owner ID and attendee IDs to our set
+          [...allMeetings, ...meetingRequestsData].forEach(meeting => {
+            // Add meeting owner if not current user
+            if (meeting.user && meeting.user !== userId) {
+              allUserIds.add(meeting.user);
+            }
+            
+            // Add all attendees except current user
+            (meeting.attendees || []).forEach(id => {
+              if (id !== userId) allUserIds.add(id);
+            });
+          });
+          
+          // Fetch user info for all unique users
+          await Promise.all(Array.from(allUserIds).map(async id => {
+            if (!userCache.current[id]) {
+              try {
+                userCache.current[id] = await getUserById(id);
+              } catch (error) {
+                console.error(`Failed to fetch user ${id}:`, error);
+                userCache.current[id] = { name: 'Unknown User', id };
+              }
+            }
+          }));
+          
+          // Format attendee names for "with" field
+          const formatAttendeeNames = (meeting) => {
+            const attendeeNames = (meeting.attendees || [])
+              .filter(id => id !== userId)
+              .map(id => userCache.current[id]?.name?.split(' ')[0] || 'Unknown');
+              
+            const withStr = formatMeetingWith(attendeeNames);
+            
+            // Get organizer name
+            let organizerName = 'You';
+            if (!isOwner(meeting) && meeting.user) {
+              organizerName = userCache.current[meeting.user]?.name || 'Unknown';
+            }
+            
+            return {
+              ...meeting,
+              with: withStr,
+              organizer_name: organizerName,
+              isOwner: isOwner(meeting)
+            };
+          };
+          
+          // Process all meetings with user info
+          const processedMeetings = allMeetings.map(formatAttendeeNames);
+          const processedRequests = meetingRequestsData.map(formatAttendeeNames);
+          
+          // MY SCHEDULED MEETINGS:
+          // 1. You are the owner AND meeting is CONFIRMED
+          // 2. You are an attendee (not owner) AND meeting is CONFIRMED
+          const scheduledMeetings = processedMeetings.filter(meeting => 
+            meeting.meeting_status === 'CONFIRMED' && 
+            (isOwner(meeting) || !isOwner(meeting)) // Both your meetings and others you've accepted
+          );
+          
+          // MEETING REQUESTS:
+          // Meetings where you're an attendee (not owner)
+          // Both pending and rejected are shown
+          const requests = processedRequests.filter(meeting => 
+            !isOwner(meeting) // Not meetings you created
+          );
+          
+          // MEETINGS SENT:
+          // Meetings you created with status SENT or CANCELED
+          const sentMeetings = processedMeetings.filter(meeting => 
+            isOwner(meeting) && 
+            (meeting.meeting_status === 'SENT' || meeting.meeting_status === 'CANCELED')
+          );
+          
+          // Update state with processed meetings
+          setMeetings(scheduledMeetings);
+          setMeetingRequests(requests);
+          setMeetingsSent(sentMeetings);
         };
-      });
-      
-      setMeetings(formatMeetings(scheduledMeetings));
-      setMeetingsSent(formatMeetings(sentMeetings));
-      setMeetingRequests(formatMeetings(meetingRequestsRes));
+        
+        // Process user info for all meetings
+        processUserInfo();
+        
+      } catch (error) {
+        console.error("Error fetching meeting data:", error);
+      }
     }
     
     fetchData();

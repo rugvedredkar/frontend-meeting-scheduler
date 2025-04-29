@@ -1,5 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
-const API_BASE = 'http://18.191.62.47'; // Change this if you're deployed
+const API_BASE = 'http://18.191.62.47'; // prod
+// const API_BASE = 'http://10.0.0.243:8080' // dev 
 
 /*
  * Gets the user info
@@ -67,7 +68,7 @@ export async function getMyEvents() {
     throw new Error('No auth token found. Please log in again.');
   }
 
-  const res = await fetch(`${API_BASE}/events`, {
+  const res = await fetch(`${API_BASE}/user-events`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${idToken}`
