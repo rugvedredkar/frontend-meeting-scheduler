@@ -171,12 +171,12 @@ function MeetingDetailsModal({ meeting, currentUserId, onClose, onAction, action
           </div>
           
           <div className="meeting-details-grid">
-            <div><b><CalendarIcon size={16} className="icon-margin-right" /> Date:</b> {meeting.date}</div>
-            <div><b><Clock size={16} className="icon-margin-right" /> Time:</b> {meeting.time}</div>
+            <div><b><CalendarIcon size={16} className="icon-margin-right" /> Date: </b> {meeting.date}</div>
+            <div><b><Clock size={16} className="icon-margin-right" /> Time: </b> {meeting.time}</div>
             <VenueDisplay venue={meeting.venue} />
             {meeting.description && (
               <div className="meeting-description">
-                <b>Description:</b>
+                <b>Description:</b>x
                 <p>{meeting.description}</p>
               </div>
             )}
@@ -298,6 +298,7 @@ export default function Meetings() {
   }, []);
 
   // Fetch user data, meetings, and requests
+  // TO DO // ### FIX THE bug d
   useEffect(() => {
     async function fetchData() {
       const user = await getUser();
@@ -330,7 +331,7 @@ export default function Meetings() {
       // Set initial data
       setMeetings(scheduledMeetings);
       setMeetingsSent(sentMeetings);
-      setMeetingRequests(meetingRequestsRes);
+      setMeetingRequests(meetingRequestsRes.filter((event) => event.user !== userId));
       
       // Get all unique attendee IDs and owner IDs
       const allMeetings = [...scheduledMeetings, ...sentMeetings, ...meetingRequestsRes];
